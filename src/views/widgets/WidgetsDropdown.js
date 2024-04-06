@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+/* eslint-disable */
+import React, { useEffect, useRef, useState } from 'react'
 import PropTypes from 'prop-types'
 
 import {
@@ -14,6 +15,7 @@ import { getStyle } from '@coreui/utils'
 import { CChartBar, CChartLine } from '@coreui/react-chartjs'
 import CIcon from '@coreui/icons-react'
 import { cilArrowBottom, cilArrowTop, cilOptions } from '@coreui/icons'
+import { getAllUsers } from '../../api'
 
 const WidgetsDropdown = (props) => {
   const widgetChartRef1 = useRef(null)
@@ -37,6 +39,22 @@ const WidgetsDropdown = (props) => {
     })
   }, [widgetChartRef1, widgetChartRef2])
 
+  const [users, setUsers] = useState([])
+console.log("users",users)
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const fetchedUsers = await getAllUsers()
+        setUsers(fetchedUsers)
+      } catch (error) {
+        // Handle error
+        console.error('Error fetching users:', error)
+      }
+    };
+
+    fetchUsers()
+  }, [])
+
   return (
     <CRow className={props.className} xs={{ gutter: 4 }}>
       <CCol sm={6} xl={4} xxl={3}>
@@ -44,14 +62,13 @@ const WidgetsDropdown = (props) => {
           color="primary"
           value={
             <>
-              26K{' '}
-              <span className="fs-6 fw-normal">
-                {/* (-12.4% <CIcon icon={cilArrowBottom} />) */}
-                Total
-              </span>
+              {users?.length}
+              {/* <span className="fs-6 fw-normal">
+                (-12.4% <CIcon icon={cilArrowBottom} />)
+              </span> */}
             </>
           }
-          title="Users"
+          title="Total Users"
           // action={
           //   <CDropdown alignment="end">
           //     <CDropdownToggle color="transparent" caret={false} className="text-white p-0">
