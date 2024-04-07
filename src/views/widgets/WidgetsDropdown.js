@@ -15,7 +15,7 @@ import { getStyle } from '@coreui/utils'
 import { CChartBar, CChartLine } from '@coreui/react-chartjs'
 import CIcon from '@coreui/icons-react'
 import { cilArrowBottom, cilArrowTop, cilOptions } from '@coreui/icons'
-import { getAllUsers, getUsersCountByMonth } from '../../api'
+import { getAllUsers, getEventsCountByMonth, getUsersCountByMonth, getallevents } from '../../api'
 
 const WidgetsDropdown = (props) => {
   const widgetChartRef1 = useRef(null)
@@ -41,14 +41,6 @@ const WidgetsDropdown = (props) => {
 
   const [users, setUsers] = useState([])
   const [getUsersMonthWise, setGetUsersMonthWise] = useState([])
-// console.log("users",users);
-// const timepass = users[1]
-// console.log("users",timepass?.created_at);
-// const date = new Date(timepass?.created_at);
-
-// const humanDate = date.toLocaleString();
-
-// console.log(getUsersMonthWise);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -72,6 +64,34 @@ const WidgetsDropdown = (props) => {
 
     fetchUsers()
     getUsersCounts()
+  }, [])
+
+
+  const [events, setEvents] = useState([])
+  const [getEventsMonthWise, setGetEventsMonthWise] = useState([])
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const fetchedEvents = await getallevents()
+        setEvents(fetchedEvents)
+      } catch (error) {
+        // Handle error
+        console.error('Error fetching users:', error)
+      }
+    };
+    const getEventsCounts = async () => {
+      try {
+        const getEventsCount = await getEventsCountByMonth()
+        setGetEventsMonthWise(getEventsCount)
+      } catch (error) {
+        // Handle error
+        console.error('Error fetching getUsersCountByMonth:', error)
+      }
+    };
+
+    fetchEvents()
+    getEventsCounts()
   }, [])
 
   return (
@@ -167,45 +187,45 @@ const WidgetsDropdown = (props) => {
           }
         />
       </CCol>
-      {/* <CCol sm={6} xl={4} xxl={3}>
+      <CCol sm={6} xl={4} xxl={3}>
         <CWidgetStatsA
           color="info"
           value={
             <>
-              $6.200{' '}
-              <span className="fs-6 fw-normal">
+              {events.length}
+              {/* <span className="fs-6 fw-normal">
                 (40.9% <CIcon icon={cilArrowTop} />)
-              </span>
+              </span> */}
             </>
           }
-          title="Income"
-          action={
-            <CDropdown alignment="end">
-              <CDropdownToggle color="transparent" caret={false} className="text-white p-0">
-                <CIcon icon={cilOptions} />
-              </CDropdownToggle>
-              <CDropdownMenu>
-                <CDropdownItem>Action</CDropdownItem>
-                <CDropdownItem>Another action</CDropdownItem>
-                <CDropdownItem>Something else here...</CDropdownItem>
-                <CDropdownItem disabled>Disabled action</CDropdownItem>
-              </CDropdownMenu>
-            </CDropdown>
-          }
+          title="Total Events"
+          // action={
+          //   <CDropdown alignment="end">
+          //     <CDropdownToggle color="transparent" caret={false} className="text-white p-0">
+          //       <CIcon icon={cilOptions} />
+          //     </CDropdownToggle>
+          //     <CDropdownMenu>
+          //       <CDropdownItem>Action</CDropdownItem>
+          //       <CDropdownItem>Another action</CDropdownItem>
+          //       <CDropdownItem>Something else here...</CDropdownItem>
+          //       <CDropdownItem disabled>Disabled action</CDropdownItem>
+          //     </CDropdownMenu>
+          //   </CDropdown>
+          // }
           chart={
             <CChartLine
               ref={widgetChartRef2}
               className="mt-3 mx-3"
-              style={{ height: '70px' }}
+              style={{ height: '70px', color: "#4F99FF"  }}
               data={{
-                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
                 datasets: [
                   {
                     label: 'My First dataset',
                     backgroundColor: 'transparent',
                     borderColor: 'rgba(255,255,255,.55)',
                     pointBackgroundColor: getStyle('--cui-info'),
-                    data: [1, 18, 9, 17, 34, 22, 11],
+                    data: getEventsMonthWise,
                   },
                 ],
               }}
@@ -230,8 +250,8 @@ const WidgetsDropdown = (props) => {
                     },
                   },
                   y: {
-                    min: -9,
-                    max: 39,
+                    min: -1,
+                    // max: 39,
                     display: false,
                     grid: {
                       display: false,
@@ -256,7 +276,7 @@ const WidgetsDropdown = (props) => {
           }
         />
       </CCol>
-      <CCol sm={6} xl={4} xxl={3}>
+      {/* <CCol sm={6} xl={4} xxl={3}>
         <CWidgetStatsA
           color="warning"
           value={
