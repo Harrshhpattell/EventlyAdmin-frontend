@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import classNames from 'classnames'
 
 import {
@@ -53,6 +53,7 @@ import avatar6 from 'src/assets/images/avatars/6.jpg'
 import WidgetsBrand from '../widgets/WidgetsBrand'
 import WidgetsDropdown from '../widgets/WidgetsDropdown'
 import MainChart from './MainChart'
+import { getAllUsers } from '../../api'
 
 const Dashboard = () => {
   const progressExample = [
@@ -175,11 +176,46 @@ const Dashboard = () => {
       activity: 'Last week',
     },
   ]
+/* eslint-disable */
+const linkIcon = (
+  <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961"/>
+</svg>
+)
+
+  const [users, setUsers] = useState([])
+  // console.log("users",users);
+  // const timepass = users[1]
+  // console.log("users",timepass?.created_at);
+  // const date = new Date(timepass?.created_at);
+  
+  // const humanDate = date.toLocaleString();
+  
+  // console.log(humanDate);
+  
+    useEffect(() => {
+      const fetchUsers = async () => {
+        try {
+          const fetchedUsers = await getAllUsers()
+          setUsers(fetchedUsers)
+        } catch (error) {
+          // Handle error
+          console.error('Error fetching users:', error)
+        }
+      };
+  
+      fetchUsers()
+    }, [])
+
+    const options = {
+      timeZone: 'Asia/Kolkata', // Indian Standard Time (IST) timezone
+      timeZoneName: 'short', // Display timezone abbreviation
+    };
 
   return (
     <>
       <WidgetsDropdown className="mb-4" />
-      <CCard className="mb-4">
+      {/* <CCard className="mb-4">
         <CCardBody>
           <CRow>
             <CCol sm={5}>
@@ -232,14 +268,14 @@ const Dashboard = () => {
             ))}
           </CRow>
         </CCardFooter>
-      </CCard>
-      <WidgetsBrand className="mb-4" withCharts />
+      </CCard> */}
+      {/* <WidgetsBrand className="mb-4" withCharts /> */}
       <CRow>
         <CCol xs>
           <CCard className="mb-4">
-            <CCardHeader>Traffic {' & '} Sales</CCardHeader>
+            <CCardHeader>Users Data</CCardHeader>
             <CCardBody>
-              <CRow>
+              {/* <CRow>
                 <CCol xs={12} md={6} xl={6}>
                   <CRow>
                     <CCol xs={6}>
@@ -319,7 +355,7 @@ const Dashboard = () => {
                     </div>
                   ))}
                 </CCol>
-              </CRow>
+              </CRow> */}
 
               <br />
 
@@ -329,19 +365,21 @@ const Dashboard = () => {
                     <CTableHeaderCell className="bg-body-tertiary text-center">
                       <CIcon icon={cilPeople} />
                     </CTableHeaderCell>
-                    <CTableHeaderCell className="bg-body-tertiary">User</CTableHeaderCell>
-                    <CTableHeaderCell className="bg-body-tertiary text-center">
+                    <CTableHeaderCell className="bg-body-tertiary">Name</CTableHeaderCell>
+                    <CTableHeaderCell className="bg-body-tertiary">Email</CTableHeaderCell>
+                    <CTableHeaderCell className="bg-body-tertiary">ClerkId</CTableHeaderCell>
+                    {/* <CTableHeaderCell className="bg-body-tertiary text-center">
                       Country
-                    </CTableHeaderCell>
-                    <CTableHeaderCell className="bg-body-tertiary">Usage</CTableHeaderCell>
-                    <CTableHeaderCell className="bg-body-tertiary text-center">
+                    </CTableHeaderCell> */}
+                    {/* <CTableHeaderCell className="bg-body-tertiary">Usage</CTableHeaderCell> */}
+                    {/* <CTableHeaderCell className="bg-body-tertiary text-center">
                       Payment Method
-                    </CTableHeaderCell>
-                    <CTableHeaderCell className="bg-body-tertiary">Activity</CTableHeaderCell>
+                    </CTableHeaderCell> */}
+                    <CTableHeaderCell className="bg-body-tertiary">Last Updated</CTableHeaderCell>
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>
-                  {tableExample.map((item, index) => (
+                  {/* {tableExample.map((item, index) => (
                     <CTableRow v-for="item in tableItems" key={index}>
                       <CTableDataCell className="text-center">
                         <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />
@@ -371,6 +409,53 @@ const Dashboard = () => {
                       <CTableDataCell>
                         <div className="small text-body-secondary text-nowrap">Last login</div>
                         <div className="fw-semibold text-nowrap">{item.activity}</div>
+                      </CTableDataCell>
+                    </CTableRow>
+                  ))} */}
+                  {users.map((item, index) => (
+                    <CTableRow v-for="item in tableItems" key={index}>
+                      <CTableDataCell className="text-center">
+                        <CAvatar size="md" src={item.photo} />
+                      </CTableDataCell>
+                      <CTableDataCell>
+                        <div>{item.firstName} {item.lastName}</div>
+                        <div className="small text-body-secondary text-nowrap">
+                          <span>New</span> | Joined on:{' '}
+                          {item.createdAt && new Date(item.createdAt).toLocaleString('en-IN', options)}
+                        </div>
+                      </CTableDataCell>
+                      <CTableDataCell>
+                        <div>{item.email}</div>
+                        {/* <div className="small text-body-secondary text-nowrap">
+                          <span>{item.user.new ? 'New' : 'Recurring'}</span> | Registered:{' '}
+                          {item.user.registered}
+                        </div> */}
+                      </CTableDataCell>
+                      <CTableDataCell>
+                        <div>{item.clerkId}</div>
+                        <a href={`https://dashboard.clerk.com/apps/app_2bWs3izKIUOoeizF7T6zJ3IfURW/instances/ins_2bWs3i8ton9ChVjWvv2REqWpHUy/users/${item.clerkId}`} target="_blank" rel="noopener noreferrer">
+                          <span>{linkIcon}</span>
+                        </a>
+                      </CTableDataCell>
+                      {/* <CTableDataCell className="text-center">
+                        <CIcon size="xl" icon={item.country.flag} title={item.country.name} />
+                      </CTableDataCell> */}
+                      {/* <CTableDataCell>
+                        <div className="d-flex justify-content-between text-nowrap">
+                          <div className="fw-semibold">{item.usage.value}%</div>
+                          <div className="ms-3">
+                            <small className="text-body-secondary">{item.usage.period}</small>
+                          </div>
+                        </div>
+                        <CProgress thin color={item.usage.color} value={item.usage.value} />
+                      </CTableDataCell>
+                      <CTableDataCell className="text-center">
+                        <CIcon size="xl" icon={item.payment.icon} />
+                      </CTableDataCell> */}
+                      <CTableDataCell>
+                        <div className="small text-body-secondary text-nowrap">Updated At</div>
+                        {/* <div className="fw-semibold text-nowrap">{item.activity}</div> */}
+                        <div className="fw-semibold text-nowrap">{item.updatedAt && new Date(item.updatedAt).toLocaleString('en-IN', options)}</div>
                       </CTableDataCell>
                     </CTableRow>
                   ))}

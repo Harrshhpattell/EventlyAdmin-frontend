@@ -15,7 +15,7 @@ import { getStyle } from '@coreui/utils'
 import { CChartBar, CChartLine } from '@coreui/react-chartjs'
 import CIcon from '@coreui/icons-react'
 import { cilArrowBottom, cilArrowTop, cilOptions } from '@coreui/icons'
-import { getAllUsers } from '../../api'
+import { getAllUsers, getUsersCountByMonth } from '../../api'
 
 const WidgetsDropdown = (props) => {
   const widgetChartRef1 = useRef(null)
@@ -40,7 +40,16 @@ const WidgetsDropdown = (props) => {
   }, [widgetChartRef1, widgetChartRef2])
 
   const [users, setUsers] = useState([])
-console.log("users",users)
+  const [getUsersMonthWise, setGetUsersMonthWise] = useState([])
+// console.log("users",users);
+// const timepass = users[1]
+// console.log("users",timepass?.created_at);
+// const date = new Date(timepass?.created_at);
+
+// const humanDate = date.toLocaleString();
+
+// console.log(getUsersMonthWise);
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -51,8 +60,18 @@ console.log("users",users)
         console.error('Error fetching users:', error)
       }
     };
+    const getUsersCounts = async () => {
+      try {
+        const getUsersCount = await getUsersCountByMonth()
+        setGetUsersMonthWise(getUsersCount)
+      } catch (error) {
+        // Handle error
+        console.error('Error fetching getUsersCountByMonth:', error)
+      }
+    };
 
     fetchUsers()
+    getUsersCounts()
   }, [])
 
   return (
@@ -86,16 +105,17 @@ console.log("users",users)
             <CChartLine
               ref={widgetChartRef1}
               className="mt-3 mx-3"
-              style={{ height: '70px' }}
+              style={{ height: '70px', color: "#5856D6" }}
               data={{
-                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
                 datasets: [
                   {
                     label: 'My First dataset',
                     backgroundColor: 'transparent',
                     borderColor: 'rgba(255,255,255,.55)',
                     pointBackgroundColor: getStyle('--cui-primary'),
-                    data: [65, 59, 84, 84, 51, 55, 40],
+                    // data: [65, 59, 84, 84, 51, 55, 40],
+                    data: getUsersMonthWise,
                   },
                 ],
               }}
@@ -120,8 +140,8 @@ console.log("users",users)
                     },
                   },
                   y: {
-                    min: 30,
-                    max: 89,
+                    min: -1,
+                    // max: 10,
                     display: false,
                     grid: {
                       display: false,
