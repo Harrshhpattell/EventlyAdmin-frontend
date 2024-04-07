@@ -94,6 +94,25 @@ const WidgetsDropdown = (props) => {
     getEventsCounts()
   }, [])
 
+  // calculating increasing or decreasing rate
+  const eventsForCurrentMonth = events.filter(event => {
+    const eventDate = new Date(event.startDateTime);
+    return eventDate.getMonth() === new Date().getMonth();
+  });
+  const eventsCountForCurrentMonth = eventsForCurrentMonth.length;
+  
+  // Get the number of events for the previous month (March)
+  const previousMonth = new Date().getMonth() - 1;
+  const eventsForPreviousMonth = events.filter(event => {
+    const eventDate = new Date(event.startDateTime);
+    return eventDate.getMonth() === previousMonth;
+  });
+  const eventsCountForPreviousMonth = eventsForPreviousMonth.length;
+  
+  // Calculate the percentage increase
+  const percentageIncrease = ((eventsCountForCurrentMonth - eventsCountForPreviousMonth) / eventsCountForPreviousMonth) * 100;
+  const arrowIcon = percentageIncrease >= 0 ? cilArrowTop : cilArrowBottom;
+
   return (
     <CRow className={props.className} xs={{ gutter: 4 }}>
       <CCol sm={6} xl={4} xxl={3}>
@@ -127,7 +146,7 @@ const WidgetsDropdown = (props) => {
               className="mt-3 mx-3"
               style={{ height: '70px', color: "#5856D6" }}
               data={{
-                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                labels: [`January ${getUsersMonthWise[0]}`, `February ${getUsersMonthWise[1]}`, `March ${getUsersMonthWise[2]}`, `April ${getUsersMonthWise[3]}`, `May ${getUsersMonthWise[4]}`, `June ${getUsersMonthWise[5]}`, `July ${getUsersMonthWise[6]}`, `August ${getUsersMonthWise[7]}`, `September ${getUsersMonthWise[8]}`, `October ${getUsersMonthWise[9]}`, `November ${getUsersMonthWise[10]}`, `December ${getUsersMonthWise[11]}`],
                 datasets: [
                   {
                     label: 'My First dataset',
@@ -192,10 +211,10 @@ const WidgetsDropdown = (props) => {
           color="info"
           value={
             <>
-              {events.length}
-              {/* <span className="fs-6 fw-normal">
-                (40.9% <CIcon icon={cilArrowTop} />)
-              </span> */}
+              {events.length}{" "}
+              <span className="fs-6 fw-normal">
+                ({percentageIncrease.toFixed(1)}% <CIcon icon={arrowIcon} />)
+              </span>
             </>
           }
           title="Total Events"
@@ -218,7 +237,7 @@ const WidgetsDropdown = (props) => {
               className="mt-3 mx-3"
               style={{ height: '70px', color: "#4F99FF"  }}
               data={{
-                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                labels: [`January ${getEventsMonthWise[0]}`, `February ${getEventsMonthWise[1]}`, `March ${getEventsMonthWise[2]}`, `April ${getEventsMonthWise[3]}`, `May ${getEventsMonthWise[4]}`, `June ${getEventsMonthWise[5]}`, `July ${getEventsMonthWise[6]}`, `August ${getEventsMonthWise[7]}`, `September ${getEventsMonthWise[8]}`, `October ${getEventsMonthWise[9]}`, `November ${getEventsMonthWise[10]}`, `December ${getEventsMonthWise[11]}`],
                 datasets: [
                   {
                     label: 'My First dataset',

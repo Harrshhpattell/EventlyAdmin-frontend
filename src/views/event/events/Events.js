@@ -22,26 +22,33 @@ import {
 } from '@coreui/icons'
 
 import WidgetsDropdown from '../../widgets/WidgetsDropdown'
-import { getallevents } from '../../../api'
+import { getAllUsers, getallevents, getallorders } from '../../../api'
 
 const Dashboard = () => {
     const customTooltipStyle = {
         '--cui-tooltip-bg': 'var(--cui-primary)',
       }
 
-const linkIcon = (
-  <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961"/>
-</svg>
-)
+    const linkIcon = (
+    <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961"/>
+    </svg>
+    )
 
   const [events, setEvents] = useState([])
+  const [orders, setOrders] = useState([])
+  const [users, setUsers] = useState([])
+
   
     useEffect(() => {
       const fetchUsers = async () => {
         try {
-          const fetchedUsers = await getallevents()
-          setEvents(fetchedUsers)
+          const fetchedEvents = await getallevents()
+          const fetchOrders = await getallorders()
+          const fetchedUsers = await getAllUsers()
+          setUsers(fetchedUsers)
+          setOrders(fetchOrders)
+          setEvents(fetchedEvents)
         } catch (error) {
           // Handle error
           console.error('Error fetching users:', error)
@@ -82,14 +89,23 @@ const linkIcon = (
                       <CIcon icon={cilPeople} />
                     </CTableHeaderCell>
                     <CTableHeaderCell className="bg-body-tertiary">Title</CTableHeaderCell>
+                    <CTableHeaderCell className="bg-body-tertiary">Organizer</CTableHeaderCell>
                     <CTableHeaderCell className="bg-body-tertiary">Start Date, Time</CTableHeaderCell>
                     <CTableHeaderCell className="bg-body-tertiary">End Date, Time</CTableHeaderCell>
                     <CTableHeaderCell className="bg-body-tertiary">Price</CTableHeaderCell>
                     <CTableHeaderCell className="bg-body-tertiary">URL</CTableHeaderCell>
+                    <CTableHeaderCell className="bg-body-tertiary">
+                      <CIcon icon={cilPeople} />
+                    </CTableHeaderCell>
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>
-                  {events.filter(item => new Date(item.startDateTime) >= new Date()).sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime)).map((item, index) => (
+                  {events.filter(item => new Date(item.startDateTime) >= new Date()).sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime)).map((item, index) => {
+                    const ordersForEvent = orders.filter(order => order.event === item._id);
+                    const orderCount = ordersForEvent.length;
+
+                    const organizer = users.find(user => user._id === item.organizer);
+                    return (
                     <CTableRow v-for="item in tableItems" key={index}>
                       <CTableDataCell className="text-center">
                         <CAvatar size="md" src={item.imageUrl} />
@@ -106,6 +122,12 @@ const linkIcon = (
                           </CTooltip>
                       </CTableDataCell>
                       <CTableDataCell>
+                        <div>{organizer ? organizer.firstName : "Unknown"} {organizer ? organizer.lastName : "Unknown"}</div>
+                        <div className="small text-body-secondary text-nowrap">
+                          <span>{organizer ? organizer.email : "Unknown"}</span>
+                        </div>
+                      </CTableDataCell>
+                      <CTableDataCell>
                       <div>{formatDate(item.startDateTime)}</div>
                       </CTableDataCell>
                       <CTableDataCell>
@@ -120,12 +142,15 @@ const linkIcon = (
                           <span>{linkIcon}</span>
                         </a>
                       </CTableDataCell>
+                      <CTableDataCell>
+                      <div>{orderCount}</div>
+                      </CTableDataCell>
                       {/* <CTableDataCell>
                         <div className="small text-body-secondary text-nowrap">Updated At</div>
                         <div className="fw-semibold text-nowrap">{item.updatedAt && new Date(item.updatedAt).toLocaleString('en-IN', options)}</div>
                       </CTableDataCell> */}
                     </CTableRow>
-                  ))}
+                  )})}
                 </CTableBody>
               </CTable>
             </CCardBody>
@@ -147,14 +172,22 @@ const linkIcon = (
                       <CIcon icon={cilPeople} />
                     </CTableHeaderCell>
                     <CTableHeaderCell className="bg-body-tertiary">Title</CTableHeaderCell>
+                    <CTableHeaderCell className="bg-body-tertiary">Organizer</CTableHeaderCell>
                     <CTableHeaderCell className="bg-body-tertiary">Start Date, Time</CTableHeaderCell>
                     <CTableHeaderCell className="bg-body-tertiary">End Date, Time</CTableHeaderCell>
                     <CTableHeaderCell className="bg-body-tertiary">Price</CTableHeaderCell>
                     <CTableHeaderCell className="bg-body-tertiary">URL</CTableHeaderCell>
+                    <CTableHeaderCell className="bg-body-tertiary">
+                      <CIcon icon={cilPeople} />
+                    </CTableHeaderCell>
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>
-                  {events.filter(item => new Date(item.startDateTime) <= new Date()).sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime)).map((item, index) => (
+                  {events.filter(item => new Date(item.startDateTime) <= new Date()).sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime)).map((item, index) => {
+                    const ordersForEvent = orders.filter(order => order.event === item._id);
+                    const orderCount = ordersForEvent.length;
+                    const organizer = users.find(user => user._id === item.organizer);
+                    return(
                     <CTableRow v-for="item in tableItems" key={index}>
                       <CTableDataCell className="text-center">
                         <CAvatar size="md" src={item.imageUrl} />
@@ -171,6 +204,12 @@ const linkIcon = (
                           </CTooltip>
                       </CTableDataCell>
                       <CTableDataCell>
+                        <div>{organizer ? organizer.firstName : "Unknown"} {organizer ? organizer.lastName : "Unknown"}</div>
+                        <div className="small text-body-secondary text-nowrap">
+                          <span>{organizer ? organizer.email : "Unknown"}</span>
+                        </div>
+                      </CTableDataCell> 
+                      <CTableDataCell>
                       <div>{formatDate(item.startDateTime)}</div>
                       </CTableDataCell>
                       <CTableDataCell>
@@ -185,12 +224,15 @@ const linkIcon = (
                           <span>{linkIcon}</span>
                         </a>
                       </CTableDataCell>
+                      <CTableDataCell>
+                      <div>{orderCount}</div>
+                      </CTableDataCell>
                       {/* <CTableDataCell>
                         <div className="small text-body-secondary text-nowrap">Updated At</div>
                         <div className="fw-semibold text-nowrap">{item.updatedAt && new Date(item.updatedAt).toLocaleString('en-IN', options)}</div>
                       </CTableDataCell> */}
                     </CTableRow>
-                  ))}
+                  )})}
                 </CTableBody>
               </CTable>
             </CCardBody>

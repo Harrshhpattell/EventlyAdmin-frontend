@@ -19,6 +19,15 @@ export const getallevents = async () => {
     throw error
   }
 }
+export const getallorders = async () => {
+  try {
+    const response = await axios.get('http://localhost:8000/api/v1/adminOrders/allorders')
+    return response.data
+  } catch (error) {
+    console.error('Error fetching orders:', error)
+    throw error
+  }
+}
 
 export const getUsersCountByMonth = async () => {
   try {
