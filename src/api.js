@@ -50,3 +50,14 @@ export const getEventsCountByMonth = async () => {
     throw error
   }
 }
+
+
+export const deleteEventById = async (eventId) => {
+  try {
+    const response = await axios.delete(`http://localhost:8000/api/v1/adminEvent/deleteEvent/${eventId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    throw error;
+  }
+}
