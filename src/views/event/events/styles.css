@@ -27,3 +27,14 @@
     border-radius: 5px;
     cursor: pointer;
   }
+
+  .viewBtn {
+    background-color: rgb(107, 115, 234);
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+    cursor: pointer;
+  }

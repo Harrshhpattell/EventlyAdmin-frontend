@@ -8,6 +8,10 @@ import {
   CCardBody,
   CCardHeader,
   CCol,
+  CFormInput,
+  CImage,
+  CInputGroup,
+  CInputGroupText,
   CModal,
   CModalBody,
   CModalFooter,
@@ -24,6 +28,8 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import {
+  cilLocationPin,
+  cilNotes,
   cilPeople,
   cilTrash,
 } from '@coreui/icons'
@@ -48,6 +54,10 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [deleteModel, setDeleteModel] = useState(false)
   const [reqDeleteEventId, setReqDeleteEventId] = useState(null)
+  const [viewModel, setViewModel] = useState(false)
+  const [viewEventId, setViewEventId] = useState({})
+  console.log("viewEventId", viewEventId)
+  console.log("users", users)
   
     useEffect(() => {
       const fetchUsers = async () => {
@@ -149,7 +159,7 @@ const Dashboard = () => {
                       .filter((item) => new Date(item.startDateTime) >= new Date())
                       .sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime))
                       .map((item, index) => {
-                        const ordersForEvent = orders.filter((order) => order.event === item._id)
+                        const ordersForEvent = orders?.filter((order) => order.event === item._id)
                         const orderCount = ordersForEvent.length
 
                         const organizer = users.find((user) => user._id === item.organizer)
@@ -201,14 +211,38 @@ const Dashboard = () => {
                               <div>{orderCount}</div>
                             </CTableDataCell>
                             <CTableDataCell>
-                              <div style={{ display: 'flex' }}>
-                                <div className="deteleButton"
-                                onClick={() => {
-                                  setDeleteModel(!deleteModel);
-                                  setReqDeleteEventId(item._id);
-                                }}
+                              <div style={{ display: 'flex', gap: '10px' }}>
+                                <div
+                                  className="deteleButton"
+                                  onClick={() => {
+                                    setDeleteModel(!deleteModel)
+                                    setReqDeleteEventId(item._id)
+                                  }}
                                 >
                                   <CIcon style={{ color: 'white' }} icon={cilTrash} />
+                                </div>
+                                <div
+                                  className="viewBtn"
+                                  onClick={() => {
+                                    setViewModel(!viewModel)
+                                    setViewEventId({
+                                      id: item._id,
+                                      title: item.title,
+                                      location: item.location,
+                                      description: item.description,
+                                      image: item.imageUrl,
+                                      organizerfn: organizer.firstName,
+                                      organizerln: organizer.lastName,
+                                      organizerEmail: organizer.email,
+                                      start: item.startDateTime,
+                                      end: item.endDateTime,
+                                      price: item.isFree ? 'Free' : `$ ${item.price}`,
+                                      eventurl: item.url,
+                                      ordersForEvent,
+                                    })
+                                  }}
+                                >
+                                  <CIcon style={{ color: 'white' }} icon={cilNotes} />
                                 </div>
                               </div>
                             </CTableDataCell>
@@ -327,8 +361,28 @@ const Dashboard = () => {
                             </CTableDataCell>
                             <CTableDataCell>
                               <div style={{ display: 'flex' }}>
-                                <div className="deteleButton">
-                                  <CIcon style={{ color: 'white' }} icon={cilTrash} />
+                              <div
+                                  className="viewBtn"
+                                  onClick={() => {
+                                    setViewModel(!viewModel)
+                                    setViewEventId({
+                                      id: item._id,
+                                      title: item.title,
+                                      location: item.location,
+                                      description: item.description,
+                                      image: item.imageUrl,
+                                      organizerfn: organizer.firstName,
+                                      organizerln: organizer.lastName,
+                                      organizerEmail: organizer.email,
+                                      start: item.startDateTime,
+                                      end: item.endDateTime,
+                                      price: item.isFree ? 'Free' : `$ ${item.price}`,
+                                      eventurl: item.url,
+                                      ordersForEvent,
+                                    })
+                                  }}
+                                >
+                                  <CIcon style={{ color: 'white' }} icon={cilNotes} />
                                 </div>
                               </div>
                             </CTableDataCell>
@@ -346,9 +400,14 @@ const Dashboard = () => {
           </CCard>
         </CCol>
       </CRow>
-      {/* delete modal  */}
-      <CModal visible={deleteModel}
-      onClose={() => {setDeleteModel(false); setReqDeleteEventId(null)}}>
+      {/* ********************* delete modal ***********************  */}
+      <CModal
+        visible={deleteModel}
+        onClose={() => {
+          setDeleteModel(false)
+          setReqDeleteEventId(null)
+        }}
+      >
         <CModalHeader>
           <CModalTitle>Delete Event</CModalTitle>
         </CModalHeader>
@@ -356,11 +415,169 @@ const Dashboard = () => {
           <p>Are you sure want to delete.</p>
         </CModalBody>
         <CModalFooter>
-          <CButton onClick={() => {
-            setDeleteModel(false)
-            setReqDeleteEventId(null)
-            }} color="secondary">Close</CButton>
-          <CButton color="danger" style={{color: "white"}} onClick={()=> handleDeleteEvent(reqDeleteEventId)}>Delete</CButton>
+          <CButton
+            onClick={() => {
+              setDeleteModel(false)
+              setReqDeleteEventId(null)
+            }}
+            color="secondary"
+          >
+            Close
+          </CButton>
+          <CButton
+            color="danger"
+            style={{ color: 'white' }}
+            onClick={() => handleDeleteEvent(reqDeleteEventId)}
+          >
+            Delete
+          </CButton>
+        </CModalFooter>
+      </CModal>
+      {/* **************** View modal ************************ */}
+      <CModal
+        size="xl"
+        visible={viewModel}
+        onClose={() => {
+          setViewModel(false)
+          setViewEventId({})
+        }}
+      >
+        <CModalHeader>
+          <CModalTitle>
+            <h4 style={{ textTransform: 'capitalize' }}>
+              {viewEventId.title} ({viewEventId.price})
+            </h4>
+            <p>
+              {formatDate(viewEventId.start)} To {formatDate(viewEventId.end)}
+            </p>
+          </CModalTitle>
+          {/* <CModalTitle>{formatDate(viewEventId.start)} to {formatDate(viewEventId.end)}</CModalTitle> */}
+        </CModalHeader>
+        <CModalBody>
+          <div style={{ marginBottom: '20px' }}>
+            <CImage fluid src={viewEventId.image} />
+          </div>
+          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: '300px' }}>
+              <CInputGroup className="has-validation">
+                <CInputGroupText>Event Id</CInputGroupText>
+                <CFormInput
+                  type="text"
+                  aria-describedby="inputGroupPrependFeedback"
+                  id="validationCustomUsername"
+                  value={viewEventId.id}
+                  disabled
+                  readOnly
+                />
+              </CInputGroup>
+            </div>
+            <div style={{ flex: 1, minWidth: '300px' }}>
+              <CInputGroup className="has-validation">
+                <CInputGroupText>Title</CInputGroupText>
+                <CFormInput
+                  type="text"
+                  aria-describedby="inputGroupPrependFeedback"
+                  feedbackValid="Please choose a username."
+                  value={viewEventId.title}
+                  disabled
+                  readOnly
+                />
+              </CInputGroup>
+            </div>
+          </div>
+          {/* ------------------------ */}
+          <div style={{ display: 'flex', gap: '20px', margin: '20px 0', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: '300px' }}>
+              <CInputGroup className="has-validation">
+                <CInputGroupText>Event Url</CInputGroupText>
+                <CFormInput
+                  type="text"
+                  aria-describedby="inputGroupPrependFeedback"
+                  id="validationCustomUsername"
+                  value={viewEventId.eventurl}
+                  disabled
+                  readOnly
+                />
+              </CInputGroup>
+            </div>
+            <div style={{ flex: 1, minWidth: '300px' }}>
+              <CInputGroup className="has-validation">
+                <CInputGroupText>
+                  <CIcon icon={cilLocationPin} />
+                </CInputGroupText>
+                <CFormInput
+                  type="text"
+                  aria-describedby="inputGroupPrependFeedback"
+                  value={viewEventId.location}
+                  disabled
+                  readOnly
+                />
+              </CInputGroup>
+            </div>
+          </div>
+          <CInputGroup className="has-validation">
+            <CInputGroupText>Description</CInputGroupText>
+            <CFormInput
+              type="text"
+              aria-describedby="inputGroupPrependFeedback"
+              value={viewEventId.description}
+              disabled
+              readOnly
+            />
+          </CInputGroup>
+          <hr />
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
+            <h4>
+              Organizer: {viewEventId.organizerfn} {viewEventId.organizerln}
+            </h4>
+            <p style={{ margin: 0 }}>{viewEventId.organizerEmail}</p>
+          </div>
+          <CTable>
+            <CTableHead>
+              <CTableRow>
+                <CTableHeaderCell scope="col">name</CTableHeaderCell>
+                <CTableHeaderCell scope="col">CreatedAt</CTableHeaderCell>
+                <CTableHeaderCell scope="col">StripId</CTableHeaderCell>
+              </CTableRow>
+            </CTableHead>
+            <CTableBody>
+            {viewEventId.ordersForEvent?.length === 0 ? (
+              <p>No Data Found</p>
+            ) : (
+              viewEventId.ordersForEvent?.map((parti)=>{
+                const user = users.find(user => user._id === parti.buyer);
+                console.log("user",user)
+                return(
+                  <CTableRow>
+                  <CTableDataCell>{user.firstName}</CTableDataCell>
+                  <CTableDataCell>{formatDate(parti.createdAt)}</CTableDataCell>
+                  <CTableDataCell>{parti.stripeId}</CTableDataCell>
+                </CTableRow>
+                )
+              })
+            )}
+
+            </CTableBody>
+          </CTable>
+        </CModalBody>
+        <CModalFooter>
+          <CButton
+            onClick={() => {
+              setViewModel(false)
+              setViewEventId({})
+            }}
+            color="secondary"
+          >
+            Close
+          </CButton>
+          {/* <CButton color="danger" style={{color: "white"}}>View</CButton> */}
         </CModalFooter>
       </CModal>
     </>
