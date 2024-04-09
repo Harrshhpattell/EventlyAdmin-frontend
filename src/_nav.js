@@ -7,6 +7,7 @@ import {
   cilCursor,
   cilDescription,
   cilDrop,
+  cilFilterPhoto,
   cilNotes,
   cilPencil,
   cilPuzzle,
@@ -36,12 +37,12 @@ const _nav = [
     to: '/event/events',
     icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
   },
-  // {
-  //   component: CNavItem,
-  //   name: 'Typography',
-  //   to: '/theme/typography',
-  //   icon: <CIcon icon={cilPencil} customClassName="nav-icon" />,
-  // },
+  {
+    component: CNavItem,
+    name: 'Category',
+    to: '/event/category',
+    icon: <CIcon icon={cilFilterPhoto} customClassName="nav-icon" />,
+  },
   // {
   //   component: CNavTitle,
   //   name: 'Components',
