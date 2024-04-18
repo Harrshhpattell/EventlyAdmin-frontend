@@ -15,7 +15,7 @@ import { getStyle } from '@coreui/utils'
 import { CChartBar, CChartLine } from '@coreui/react-chartjs'
 import CIcon from '@coreui/icons-react'
 import { cilArrowBottom, cilArrowTop, cilOptions } from '@coreui/icons'
-import { getAllUsers, getEventsCountByMonth, getUsersCountByMonth, getallevents } from '../../api'
+import { getAllUsers, getEventsCountByMonth, getOrdersCountByMonth, getUsersCountByMonth, getallevents, getallorders } from '../../api'
 
 const WidgetsDropdown = (props) => {
   const widgetChartRef1 = useRef(null)
@@ -41,6 +41,8 @@ const WidgetsDropdown = (props) => {
 
   const [users, setUsers] = useState([])
   const [getUsersMonthWise, setGetUsersMonthWise] = useState([])
+  const [allOrdersCounts, setAllOrdersCounts] = useState()
+  // console.log("allOrdersCounts",allOrdersCounts)
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -61,14 +63,25 @@ const WidgetsDropdown = (props) => {
         console.error('Error fetching getUsersCountByMonth:', error)
       }
     };
+    const getallorderscount = async () => {
+      try {
+        const getallordersCount = await getallorders()
+        setAllOrdersCounts(getallordersCount.length)
+      } catch (error) {
+        // Handle error
+        console.error('Error fetching getallordersCount:', error)
+      }
+    };
 
     fetchUsers()
     getUsersCounts()
+    getallorderscount()
   }, [])
 
 
   const [events, setEvents] = useState([])
   const [getEventsMonthWise, setGetEventsMonthWise] = useState([])
+  const [getOrdersMonthWise, setGetOrdersMonthWise] = useState([])
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -89,9 +102,19 @@ const WidgetsDropdown = (props) => {
         console.error('Error fetching getUsersCountByMonth:', error)
       }
     };
+    const getOrdersCount = async () => {
+      try {
+        const getOrdersCount = await getOrdersCountByMonth()
+        setGetOrdersMonthWise(getOrdersCount)
+      } catch (error) {
+        // Handle error
+        console.error('Error fetching getUsersCountByMonth:', error)
+      }
+    };
 
     fetchEvents()
     getEventsCounts()
+    getOrdersCount()
   }, [])
 
   // calculating increasing or decreasing rate
@@ -110,8 +133,8 @@ const WidgetsDropdown = (props) => {
   const eventsCountForPreviousMonth = eventsForPreviousMonth.length;
   
   // Calculate the percentage increase
-  const percentageIncrease = ((eventsCountForCurrentMonth - eventsCountForPreviousMonth) / eventsCountForPreviousMonth) * 100;
-  const arrowIcon = percentageIncrease >= 0 ? cilArrowTop : cilArrowBottom;
+  // const percentageIncrease = ((eventsCountForCurrentMonth - eventsCountForPreviousMonth) / eventsCountForPreviousMonth) * 100;
+  // const arrowIcon = percentageIncrease >= 0 ? cilArrowTop : cilArrowBottom;
 
   return (
     <CRow className={props.className} xs={{ gutter: 4 }}>
@@ -212,9 +235,9 @@ const WidgetsDropdown = (props) => {
           value={
             <>
               {events.length}{" "}
-              <span className="fs-6 fw-normal">
+              {/* <span className="fs-6 fw-normal">
                 ({percentageIncrease.toFixed(1)}% <CIcon icon={arrowIcon} />)
-              </span>
+              </span> */}
             </>
           }
           title="Total Events"
@@ -295,35 +318,36 @@ const WidgetsDropdown = (props) => {
           }
         />
       </CCol>
-      {/* <CCol sm={6} xl={4} xxl={3}>
+      <CCol sm={6} xl={4} xxl={3}>
         <CWidgetStatsA
           color="warning"
           value={
             <>
-              2.49%{' '}
+              {allOrdersCounts}{" "}
               <span className="fs-6 fw-normal">
-                (84.7% <CIcon icon={cilArrowTop} />)
+                {/* (84.7% <CIcon icon={cilArrowTop} />) */}
+                (2024)
               </span>
             </>
           }
-          title="Conversion Rate"
-          action={
-            <CDropdown alignment="end">
-              <CDropdownToggle color="transparent" caret={false} className="text-white p-0">
-                <CIcon icon={cilOptions} />
-              </CDropdownToggle>
-              <CDropdownMenu>
-                <CDropdownItem>Action</CDropdownItem>
-                <CDropdownItem>Another action</CDropdownItem>
-                <CDropdownItem>Something else here...</CDropdownItem>
-                <CDropdownItem disabled>Disabled action</CDropdownItem>
-              </CDropdownMenu>
-            </CDropdown>
-          }
+          title="Total Attendees"
+          // action={
+          //   <CDropdown alignment="end">
+          //     <CDropdownToggle color="transparent" caret={false} className="text-white p-0">
+          //       <CIcon icon={cilOptions} />
+          //     </CDropdownToggle>
+          //     <CDropdownMenu>
+          //       <CDropdownItem>Action</CDropdownItem>
+          //       <CDropdownItem>Another action</CDropdownItem>
+          //       <CDropdownItem>Something else here...</CDropdownItem>
+          //       <CDropdownItem disabled>Disabled action</CDropdownItem>
+          //     </CDropdownMenu>
+          //   </CDropdown>
+          // }
           chart={
             <CChartLine
               className="mt-3"
-              style={{ height: '70px' }}
+              style={{ height: '70px', color: "#4F99FF"  }}
               data={{
                 labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
                 datasets: [
@@ -331,7 +355,7 @@ const WidgetsDropdown = (props) => {
                     label: 'My First dataset',
                     backgroundColor: 'rgba(255,255,255,.2)',
                     borderColor: 'rgba(255,255,255,.55)',
-                    data: [78, 81, 80, 45, 34, 12, 40],
+                    data: getOrdersMonthWise,
                     fill: true,
                   },
                 ],
@@ -367,7 +391,7 @@ const WidgetsDropdown = (props) => {
           }
         />
       </CCol>
-      <CCol sm={6} xl={4} xxl={3}>
+      {/* <CCol sm={6} xl={4} xxl={3}>
         <CWidgetStatsA
           color="danger"
           value={

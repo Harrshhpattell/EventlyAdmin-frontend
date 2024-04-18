@@ -50,6 +50,16 @@ export const getEventsCountByMonth = async () => {
     throw error
   }
 }
+export const getOrdersCountByMonth = async () => {
+  try {
+    const currentYear = new Date().getFullYear();
+    const response = await axios.get(`http://localhost:8000/api/v1/adminOrders/getOrdersCountByMonth/${currentYear}`)
+    return response.data
+  } catch (error) {
+    console.error('Error fetching users:', error)
+    throw error
+  }
+}
 
 
 export const deleteEventById = async (eventId) => {
