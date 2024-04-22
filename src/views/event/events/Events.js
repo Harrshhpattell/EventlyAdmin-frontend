@@ -138,7 +138,7 @@ const Dashboard = () => {
                       <CTableHeaderCell className="bg-body-tertiary text-center">
                         <CIcon icon={cilPeople} />
                       </CTableHeaderCell>
-                      <CTableHeaderCell className="bg-body-tertiary">Title</CTableHeaderCell>
+                      <CTableHeaderCell className="bg-body-tertiary" >Title</CTableHeaderCell>
                       <CTableHeaderCell className="bg-body-tertiary">Organizer</CTableHeaderCell>
                       <CTableHeaderCell className="bg-body-tertiary">
                         Start Date, Time

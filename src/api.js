@@ -71,3 +71,18 @@ export const deleteEventById = async (eventId) => {
     throw error;
   }
 }
+
+export const signup = async (userData) => {
+  const response = await axios.post(`http://localhost:8000/api/v1/signup`, userData, {
+    withCredentials: true,
+    // headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
+export const loginApi = async (userData) => {
+  const response = await axios.post(`http://localhost:8000/api/v1/login`, userData, {
+    withCredentials: true,
+  });
+  return response.data;
+};

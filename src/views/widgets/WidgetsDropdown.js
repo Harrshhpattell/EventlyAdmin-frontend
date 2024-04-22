@@ -143,10 +143,11 @@ const WidgetsDropdown = (props) => {
           color="primary"
           value={
             <>
-              {users?.length}
-              {/* <span className="fs-6 fw-normal">
-                (-12.4% <CIcon icon={cilArrowBottom} />)
-              </span> */}
+              {users?.length}{" "}
+              <span className="fs-6 fw-normal">
+                {/* (-12.4% <CIcon icon={cilArrowBottom} />) */}
+                (2024)
+              </span>
             </>
           }
           title="Total Users"
@@ -235,9 +236,10 @@ const WidgetsDropdown = (props) => {
           value={
             <>
               {events.length}{" "}
-              {/* <span className="fs-6 fw-normal">
-                ({percentageIncrease.toFixed(1)}% <CIcon icon={arrowIcon} />)
-              </span> */}
+              <span className="fs-6 fw-normal">
+                {/* ({percentageIncrease.toFixed(1)}% <CIcon icon={arrowIcon} />) */}
+                (2024)
+              </span>
             </>
           }
           title="Total Events"
