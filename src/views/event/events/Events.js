@@ -146,7 +146,7 @@ const Dashboard = () => {
                       <CTableHeaderCell className="bg-body-tertiary">
                         End Date, Time
                       </CTableHeaderCell>
-                      <CTableHeaderCell className="bg-body-tertiary">Price</CTableHeaderCell>
+                      <CTableHeaderCell className="bg-body-tertiary">Price ($)</CTableHeaderCell>
                       <CTableHeaderCell className="bg-body-tertiary">URL</CTableHeaderCell>
                       <CTableHeaderCell className="bg-body-tertiary">
                         <CIcon icon={cilPeople} />
