@@ -18,7 +18,8 @@ import { AppSidebarNav } from './AppSidebarNav'
 
 // sidebar nav config
 import navigation from '../_nav'
-import logo from '../assets/brand/logofull.png'
+import logoFull from '../assets/brand/logofull.png'
+import logo from '../assets/brand/logo.png'
 
 const AppSidebar = () => {
   const dispatch = useDispatch()
@@ -37,10 +38,22 @@ const AppSidebar = () => {
       }}
     >
       <CSidebarHeader className="border-bottom">
-        <CSidebarBrand to="/" style={{ margin: 'auto', padding: '10px 0' }}>
+        <CSidebarBrand
+          to="/"
+          style={{
+            margin: 'auto',
+            padding: unfoldable ? '5px' : '10px 15px',
+            backgroundColor: 'white',
+            borderRadius: '8px',
+          }}
+        >
           {/* <CIcon customClassName="sidebar-brand-full" icon={logo} height={32} />
           <CIcon customClassName="sidebar-brand-narrow" icon={sygnet} height={32} /> */}
-          <img src={logo} alt="logo" height={32} />
+          {unfoldable ? (
+            <img src={logo} alt="logo" height={32} />
+          ) : (
+            <img src={logoFull} alt="logo" height={32} />
+          )}
         </CSidebarBrand>
         <CCloseButton
           className="d-lg-none"

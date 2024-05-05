@@ -34,13 +34,14 @@ import CIcon from '@coreui/icons-react'
 import {
   cilLocationPin,
   cilNotes,
+  cilPencil,
   cilPeople,
   cilPlus,
   cilTrash,
 } from '@coreui/icons'
 
 import WidgetsDropdown from '../../widgets/WidgetsDropdown'
-import { categoryDeleteApi, categoryGetApi, categoryPostApi, deleteEventById, getAllUsers, getallevents, getallorders } from '../../../api'
+import { categoryDeleteApi, categoryGetApi, categoryPostApi, categoryUpdateApi, deleteEventById, getAllUsers, getallevents, getallorders } from '../../../api'
 import logo from '../../../assets/brand/logo.png';
 
 const Dashboard = () => {
@@ -53,6 +54,8 @@ const Dashboard = () => {
   const [toastMessage, setToastMessage] = useState(null)
   const [deleteModel, setDeleteModel] = useState(false)
   const [reqDeleteCategoryId, setReqDeleteCategoryId] = useState(null)
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editCategoryData, setEditCategoryData] = useState({ id: null, name: '' });
   
   
   const fetchCategory = async () => {
@@ -104,6 +107,29 @@ const Dashboard = () => {
       }
     };
 
+  // Function to handle opening the edit category modal
+  const handleOpenEditModal = (categoryId, categoryName) => {
+    setEditCategoryData({ id: categoryId, name: categoryName });
+    setEditModalVisible(true);
+  };
+
+  const handleUpdateCategory = async () => {
+    try {
+      await categoryUpdateApi(editCategoryData.id, { name: editCategoryData.name });
+  
+      setEditModalVisible(false);
+      fetchCategory();
+      setToastMessage('Category updated successfully');
+    } catch (error) {
+      console.error('Error updating category:', error);
+      if (error.response && error.response.data && error.response.data.message) {
+        setToastMessage(error.response.data.message);
+      } else {
+        setToastMessage('An error occurred while updating category');
+      }
+    }
+  };
+
   return (
     <>
       <div style={{ position: 'fixed', top: '10px', right: '10px', zIndex: '99999' }}>
@@ -149,6 +175,7 @@ const Dashboard = () => {
                   <CTableHead className="text-nowrap">
                     <CTableRow>
                       <CTableHeaderCell className="bg-body-tertiary">Category</CTableHeaderCell>
+                      <CTableHeaderCell className="bg-body-tertiary">EventCount</CTableHeaderCell>
                       <CTableHeaderCell className="bg-body-tertiary">Action</CTableHeaderCell>
                     </CTableRow>
                   </CTableHead>
@@ -158,6 +185,14 @@ const Dashboard = () => {
                           <CTableRow v-for="item in tableItems" key={index}>
                             <CTableDataCell>
                               <div>{item.name}</div>
+                            </CTableDataCell>
+                            <CTableDataCell>
+                            <div
+                                  className="viewBtn1"
+                                >
+                                  {item.eventCount}
+                                </div>
+                              {/* <div>{item.eventCount}</div> */}
                             </CTableDataCell>
                             <CTableDataCell>
                               <div style={{ display: 'flex', gap: '10px' }}>
@@ -170,11 +205,12 @@ const Dashboard = () => {
                                 >
                                   <CIcon style={{ color: 'white' }} icon={cilTrash} />
                                 </div>
-                                {/* <div
+                                <div
                                   className="viewBtn"
+                                  onClick={() => handleOpenEditModal(item._id, item.name)}
                                 >
-                                  <CIcon style={{ color: 'white' }} icon={cilPlus} />
-                                </div> */}
+                                  <CIcon style={{ color: 'white' }} icon={cilPencil} />
+                                </div>
                               </div>
                             </CTableDataCell>
                           </CTableRow>
@@ -259,6 +295,46 @@ const Dashboard = () => {
             onClick={() => handleDeleteCategory(reqDeleteCategoryId)}
           >
             Delete
+          </CButton>
+        </CModalFooter>
+      </CModal>
+                  {/* ********************* Edit Category Modal ***********************  */}
+                  <CModal
+        visible={editModalVisible}
+        onClose={() => {
+          setEditModalVisible(false)
+        }}
+      >
+        <CModalHeader>
+          <CModalTitle>Edit category</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+        <CForm>
+          <CFormInput
+            type="text"
+            id="FormControlInput1"
+            // label="Email address"
+            placeholder="category name"
+            aria-describedby="exampleFormControlInputHelpInline"
+            onChange={(e) => setEditCategoryData({ ...editCategoryData, name: e.target.value })}
+            value={editCategoryData.name}
+          />
+        </CForm>
+        </CModalBody>
+        <CModalFooter>
+          <CButton
+            color="secondary"
+            disabled={editCategoryData.name.length < 2}
+            onClick={handleUpdateCategory}
+          >
+            Update
+          </CButton>
+          <CButton
+            color="danger"
+            onClick={() => setEditModalVisible(false)}
+            style={{ color: 'white' }}
+          >
+            Cancel
           </CButton>
         </CModalFooter>
       </CModal>

@@ -60,7 +60,9 @@ const Register = () => {
       setToastMessage('User signed up successfully')
       if (response.success) {
         const token = response.result.token
+        const isMasterAdmin = response.result.newUser.masterAdmin
         Cookies.set(`authorizationAdmin`, token, { expires: 7 })
+        Cookies.set('masterAdmin', isMasterAdmin, { expires: 7 })
         login()
         navigate(`/dashboard`)
       }

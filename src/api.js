@@ -1,5 +1,51 @@
 /* eslint-disable */
 import axios from 'axios';
+import Cookies from 'js-cookie'
+
+// Set up Axios interceptors to include the token in the headers for every request
+axios.interceptors.request.use(
+  (config) => {
+    const token = Cookies.get('authorizationAdmin');
+    if (token) {
+      config.headers.authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+
+export const getAdmin = async () => {
+  try {
+    const response = await axios.get('http://localhost:8000/api/v1/adminList')
+    return response.data
+  } catch (error) {
+    console.error('Error fetching users:', error)
+    throw error
+  }
+}
+
+export const toggleAdminStatus = async (id) => {
+  try {
+    const response = await axios.put(`http://localhost:8000/api/v1/adminList/${id}/toggle-status`);
+    return response.data;
+  } catch (error) {
+    console.error('Error toggling admin status:', error);
+    throw error;
+  }
+};
+
+export const deleteAdmin = async (id) => {
+  try {
+    const response = await axios.delete(`http://localhost:8000/api/v1/adminList/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting admin:', error);
+    throw error;
+  }
+};
 
 export const getAllUsers = async () => {
   try {
@@ -119,3 +165,14 @@ export const categoryDeleteApi = async (id) => {
     throw error
   }
 }
+
+// Update category
+export const categoryUpdateApi = async (id, newData) => {
+  try {
+    const response = await axios.put(`http://localhost:8000/api/v1/category/${id}`, newData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating category:', error);
+    throw error;
+  }
+};

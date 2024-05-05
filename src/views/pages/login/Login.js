@@ -50,7 +50,9 @@ const Login = () => {
       setToastMessage('User logged in successfully')
       if (response.success) {
         const token = response.result.token
+        const isMasterAdmin = response.result.Adminauth.masterAdmin
         Cookies.set('authorizationAdmin', token, { expires: 7 })
+        Cookies.set('masterAdmin', isMasterAdmin, { expires: 7 })
         login()
         navigate('/dashboard')
       }

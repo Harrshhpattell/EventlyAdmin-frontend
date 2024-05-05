@@ -1,5 +1,6 @@
 import React from 'react'
 
+const Admin = React.lazy(() => import('./views/admin/Admin'))
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Events = React.lazy(() => import('./views/event/events/Events'))
 const Category = React.lazy(() => import('./views/event/category/Category'))
@@ -53,6 +54,7 @@ const Category = React.lazy(() => import('./views/event/category/Category'))
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
+  { path: '/admin', name: 'Admin', element: Admin },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
   { path: '/event', name: 'event', element: Events, exact: true },
   { path: '/event/events', name: 'events', element: Events },

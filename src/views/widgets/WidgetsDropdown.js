@@ -15,7 +15,7 @@ import { getStyle } from '@coreui/utils'
 import { CChartBar, CChartLine } from '@coreui/react-chartjs'
 import CIcon from '@coreui/icons-react'
 import { cilArrowBottom, cilArrowTop, cilOptions } from '@coreui/icons'
-import { getAllUsers, getEventsCountByMonth, getOrdersCountByMonth, getUsersCountByMonth, getallevents, getallorders } from '../../api'
+import { categoryGetApi, getAllUsers, getEventsCountByMonth, getOrdersCountByMonth, getUsersCountByMonth, getallevents, getallorders } from '../../api'
 
 const WidgetsDropdown = (props) => {
   const widgetChartRef1 = useRef(null)
@@ -82,6 +82,7 @@ const WidgetsDropdown = (props) => {
   const [events, setEvents] = useState([])
   const [getEventsMonthWise, setGetEventsMonthWise] = useState([])
   const [getOrdersMonthWise, setGetOrdersMonthWise] = useState([])
+  const [highestEventCategory, setHighestEventCategory] = useState({})
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -111,10 +112,34 @@ const WidgetsDropdown = (props) => {
         console.error('Error fetching getUsersCountByMonth:', error)
       }
     };
+    const fetchCategory = async () => {
+
+      try {
+        const fetchedCategories = await categoryGetApi();
+        if (fetchedCategories.length > 0) {
+          let maxEventCategory = fetchedCategories[0]; // Initialize with the first category
+          for (let i = 1; i < fetchedCategories.length; i++) {
+            if (fetchedCategories[i].eventCount > maxEventCategory.eventCount) {
+              maxEventCategory = fetchedCategories[i]; // Update maxEventCategory if current category has higher eventCount
+            }
+          }
+          setHighestEventCategory({
+            name: maxEventCategory.name,
+            eventCount: maxEventCategory.eventCount
+          }); // Set the category with the highest eventCount in state
+        } else {
+          console.error('No categories fetched');
+        }
+      } catch (error) {
+        // Handle error
+        console.error('Error fetching users:', error)
+      }
+    };
 
     fetchEvents()
     getEventsCounts()
     getOrdersCount()
+    fetchCategory()
   }, [])
 
   // calculating increasing or decreasing rate
@@ -135,7 +160,6 @@ const WidgetsDropdown = (props) => {
   // Calculate the percentage increase
   // const percentageIncrease = ((eventsCountForCurrentMonth - eventsCountForPreviousMonth) / eventsCountForPreviousMonth) * 100;
   // const arrowIcon = percentageIncrease >= 0 ? cilArrowTop : cilArrowBottom;
-
   return (
     <CRow className={props.className} xs={{ gutter: 4 }}>
       <CCol sm={6} xl={4} xxl={3}>
@@ -256,9 +280,70 @@ const WidgetsDropdown = (props) => {
           //     </CDropdownMenu>
           //   </CDropdown>
           // }
+          // chart={
+          //   <CChartLine
+          //     ref={widgetChartRef2}
+          //     className="mt-3 mx-3"
+          //     style={{ height: '70px', color: "#4F99FF"  }}
+          //     data={{
+          //       labels: [`January ${getEventsMonthWise[0]}`, `February ${getEventsMonthWise[1]}`, `March ${getEventsMonthWise[2]}`, `April ${getEventsMonthWise[3]}`, `May ${getEventsMonthWise[4]}`, `June ${getEventsMonthWise[5]}`, `July ${getEventsMonthWise[6]}`, `August ${getEventsMonthWise[7]}`, `September ${getEventsMonthWise[8]}`, `October ${getEventsMonthWise[9]}`, `November ${getEventsMonthWise[10]}`, `December ${getEventsMonthWise[11]}`],
+          //       datasets: [
+          //         {
+          //           label: 'My First dataset',
+          //           backgroundColor: 'transparent',
+          //           borderColor: 'rgba(255,255,255,.55)',
+          //           pointBackgroundColor: getStyle('--cui-info'),
+          //           data: getEventsMonthWise,
+          //         },
+          //       ],
+          //     }}
+          //     options={{
+          //       plugins: {
+          //         legend: {
+          //           display: false,
+          //         },
+          //       },
+          //       maintainAspectRatio: false,
+          //       scales: {
+          //         x: {
+          //           border: {
+          //             display: false,
+          //           },
+          //           grid: {
+          //             display: false,
+          //             drawBorder: false,
+          //           },
+          //           ticks: {
+          //             display: false,
+          //           },
+          //         },
+          //         y: {
+          //           min: -1,
+          //           // max: 39,
+          //           display: false,
+          //           grid: {
+          //             display: false,
+          //           },
+          //           ticks: {
+          //             display: false,
+          //           },
+          //         },
+          //       },
+          //       elements: {
+          //         line: {
+          //           borderWidth: 1,
+          //         },
+          //         point: {
+          //           radius: 4,
+          //           hitRadius: 10,
+          //           hoverRadius: 4,
+          //         },
+          //       },
+          //     }}
+          //   />
+          // }
           chart={
-            <CChartLine
-              ref={widgetChartRef2}
+            <CChartBar
               className="mt-3 mx-3"
               style={{ height: '70px', color: "#4F99FF"  }}
               data={{
@@ -266,53 +351,42 @@ const WidgetsDropdown = (props) => {
                 datasets: [
                   {
                     label: 'My First dataset',
-                    backgroundColor: 'transparent',
+                    backgroundColor: 'rgba(255,255,255,.2)',
                     borderColor: 'rgba(255,255,255,.55)',
-                    pointBackgroundColor: getStyle('--cui-info'),
                     data: getEventsMonthWise,
+                    barPercentage: 0.6,
                   },
                 ],
               }}
               options={{
+                maintainAspectRatio: false,
                 plugins: {
                   legend: {
                     display: false,
                   },
                 },
-                maintainAspectRatio: false,
                 scales: {
                   x: {
-                    border: {
-                      display: false,
-                    },
                     grid: {
                       display: false,
-                      drawBorder: false,
+                      drawTicks: false,
                     },
                     ticks: {
                       display: false,
                     },
                   },
                   y: {
-                    min: -1,
-                    // max: 39,
-                    display: false,
+                    border: {
+                      display: false,
+                    },
                     grid: {
                       display: false,
+                      drawBorder: false,
+                      drawTicks: false,
                     },
                     ticks: {
                       display: false,
                     },
-                  },
-                },
-                elements: {
-                  line: {
-                    borderWidth: 1,
-                  },
-                  point: {
-                    radius: 4,
-                    hitRadius: 10,
-                    hoverRadius: 4,
                   },
                 },
               }}
@@ -393,31 +467,31 @@ const WidgetsDropdown = (props) => {
           }
         />
       </CCol>
-      {/* <CCol sm={6} xl={4} xxl={3}>
+      <CCol sm={6} xl={4} xxl={3}>
         <CWidgetStatsA
           color="danger"
           value={
             <>
-              44K{' '}
+              {highestEventCategory.eventCount}🔥{' '}
               <span className="fs-6 fw-normal">
-                (-23.6% <CIcon icon={cilArrowBottom} />)
+                ( {highestEventCategory.name} )
               </span>
             </>
           }
-          title="Sessions"
-          action={
-            <CDropdown alignment="end">
-              <CDropdownToggle color="transparent" caret={false} className="text-white p-0">
-                <CIcon icon={cilOptions} />
-              </CDropdownToggle>
-              <CDropdownMenu>
-                <CDropdownItem>Action</CDropdownItem>
-                <CDropdownItem>Another action</CDropdownItem>
-                <CDropdownItem>Something else here...</CDropdownItem>
-                <CDropdownItem disabled>Disabled action</CDropdownItem>
-              </CDropdownMenu>
-            </CDropdown>
-          }
+          title="Trending Category"
+          // action={
+          //   <CDropdown alignment="end">
+          //     <CDropdownToggle color="transparent" caret={false} className="text-white p-0">
+          //       <CIcon icon={cilOptions} />
+          //     </CDropdownToggle>
+          //     <CDropdownMenu>
+          //       <CDropdownItem>Action</CDropdownItem>
+          //       <CDropdownItem>Another action</CDropdownItem>
+          //       <CDropdownItem>Something else here...</CDropdownItem>
+          //       <CDropdownItem disabled>Disabled action</CDropdownItem>
+          //     </CDropdownMenu>
+          //   </CDropdown>
+          // }
           chart={
             <CChartBar
               className="mt-3 mx-3"
@@ -446,7 +520,7 @@ const WidgetsDropdown = (props) => {
                     label: 'My First dataset',
                     backgroundColor: 'rgba(255,255,255,.2)',
                     borderColor: 'rgba(255,255,255,.55)',
-                    data: [78, 81, 80, 45, 34, 12, 40, 85, 65, 23, 12, 98, 34, 84, 67, 82],
+                    data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     barPercentage: 0.6,
                   },
                 ],
@@ -486,7 +560,7 @@ const WidgetsDropdown = (props) => {
             />
           }
         />
-      </CCol> */}
+      </CCol>
     </CRow>
   )
 }
