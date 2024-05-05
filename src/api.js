@@ -86,3 +86,36 @@ export const loginApi = async (userData) => {
   });
   return response.data;
 };
+
+// get category
+export const categoryGetApi = async () => {
+  try {
+    const response = await axios.get(`http://localhost:8000/api/v1/category`);
+    return response.data
+  } catch (error) {
+    console.error('Error fetching category:', error)
+    throw error
+  }
+}
+
+// add category
+export const categoryPostApi = async (category) => {
+  try {
+    const response = await axios.post(`http://localhost:8000/api/v1/category`, category);
+    return response.data
+  } catch (error) {
+    console.error('Error adding category:', error)
+    throw error
+  }
+}
+
+// delete category
+export const categoryDeleteApi = async (id) => {
+  try {
+    const response = await axios.delete(`http://localhost:8000/api/v1/category/${id}`);
+    return response.data
+  } catch (error) {
+    console.error('Error deleting category:', error)
+    throw error
+  }
+}

@@ -8,6 +8,7 @@ import {
   CCardBody,
   CCardHeader,
   CCol,
+  CForm,
   CFormInput,
   CImage,
   CInputGroup,
@@ -24,6 +25,9 @@ import {
   CTableHead,
   CTableHeaderCell,
   CTableRow,
+  CToast,
+  CToastBody,
+  CToastHeader,
   CTooltip,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
@@ -31,97 +35,106 @@ import {
   cilLocationPin,
   cilNotes,
   cilPeople,
+  cilPlus,
   cilTrash,
 } from '@coreui/icons'
 
 import WidgetsDropdown from '../../widgets/WidgetsDropdown'
-import { deleteEventById, getAllUsers, getallevents, getallorders } from '../../../api'
+import { categoryDeleteApi, categoryGetApi, categoryPostApi, deleteEventById, getAllUsers, getallevents, getallorders } from '../../../api'
+import logo from '../../../assets/brand/logo.png';
 
 const Dashboard = () => {
-    const customTooltipStyle = {
-        '--cui-tooltip-bg': 'var(--cui-primary)',
-      }
 
-    const linkIcon = (
-    <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961"/>
-    </svg>
-    )
 
-  const [events, setEvents] = useState([])
-  const [orders, setOrders] = useState([])
-  const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true);
+  const [viewAddModel, setViewAddModel] = useState(false)
+  const [category, setCategory] = useState([])
+  const [newCategory, setNewCategory] = useState('')
+  const [toastMessage, setToastMessage] = useState(null)
   const [deleteModel, setDeleteModel] = useState(false)
-  const [reqDeleteEventId, setReqDeleteEventId] = useState(null)
-  const [viewModel, setViewModel] = useState(false)
-  const [viewEventId, setViewEventId] = useState({})
-  console.log("viewEventId", viewEventId)
-  console.log("users", users)
+  const [reqDeleteCategoryId, setReqDeleteCategoryId] = useState(null)
   
+  
+  const fetchCategory = async () => {
+    setLoading(true)
+    try {
+      const fetchedCategory = await categoryGetApi()
+      setCategory(fetchedCategory)
+    } catch (error) {
+      // Handle error
+      console.error('Error fetching users:', error)
+    } finally {
+      setLoading(false);
+    }
+  };
     useEffect(() => {
-      const fetchUsers = async () => {
-        setLoading(true)
-        try {
-          const fetchedEvents = await getallevents()
-          const fetchOrders = await getallorders()
-          const fetchedUsers = await getAllUsers()
-          setUsers(fetchedUsers)
-          setOrders(fetchOrders)
-          setEvents(fetchedEvents)
-        } catch (error) {
-          // Handle error
-          console.error('Error fetching users:', error)
-        } finally {
-          setLoading(false);
-        }
-      };
-  
-      fetchUsers()
+      fetchCategory()
     }, [])
 
-    const handleDeleteEvent = async (eventId) => {
+    function handleAddNewCategory(e) {
+      e.preventDefault()
+        categoryPostApi({ name: newCategory })
+        .then(data => {
+            console.log('Category added successfully:', data);
+            fetchCategory()
+            setViewAddModel(false)
+            setNewCategory('')
+            setToastMessage('Category added successfully')
+        })
+        .catch(error => {
+            console.error('Error adding category:', error);
+            setToastMessage('Category Already Exists')
+        });
+    }
+
+    const handleCloseToast = (index) => {
+      setToastMessage(null)
+    }
+
+    const handleDeleteCategory = async (categoryId) => {
       try {
-        await deleteEventById(eventId);
+        await categoryDeleteApi(categoryId);
         // After successful deletion, fetch the updated events and update the state
-        const updatedEvents = await getallevents();
-        setEvents(updatedEvents);
+        fetchCategory()
         setDeleteModel(false)
-        setReqDeleteEventId(null)
+        setReqDeleteCategoryId(null)
+        setToastMessage('Category deleted successfully')
       } catch (error) {
         console.error('Error deleting event:', error);
       }
     };
 
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        const options = { 
-          month: '2-digit', 
-          day: '2-digit', 
-          year: 'numeric', 
-          hour: 'numeric', 
-          minute: 'numeric',
-          hour12: true
-        };
-        return date.toLocaleString('en-US', options);
-      }
-
-      console.log("reqDeleteEventId",reqDeleteEventId)
-
   return (
     <>
+      <div style={{ position: 'fixed', top: '10px', right: '10px', zIndex: '99999' }}>
+        {toastMessage && (
+          <CToast animation={true} autohide={true} visible={true} onClose={handleCloseToast}>
+            <CToastHeader closeButton>
+              <CImage rounded thumbnail src={logo} width={30} height={30} />
+              <div className="fw-bold me-auto ms-2">Evently Admin Panel</div>
+              {/* <small>7 min ago</small> */}
+            </CToastHeader>
+            <CToastBody>{toastMessage}</CToastBody>
+          </CToast>
+        )}
+      </div>
       <WidgetsDropdown className="mb-4" />
-      <CRow>
+      <CRow> 
         <CCol xs>
           <CCard className="mb-4">
             <CCardHeader>
-              Category ({' '}
-              {
-                events
-                  .filter((item) => new Date(item.startDateTime) >= new Date())
-                  .sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime)).length
-              }{' '}
-              )
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div>
+                    Category ({' '}
+                  {
+                    category.length
+                  }{' '}
+                  )
+                </div>
+                <div>
+                <CButton color="primary" onClick={() => setViewAddModel(true)}><CIcon style={{ color: 'white' }} icon={cilPlus} /> Add New Category</CButton>
+                </div>
+              </div>
             </CCardHeader>
             <CCardBody>
               <br />
@@ -129,7 +142,7 @@ const Dashboard = () => {
                 <div className="loaderSection">
                   <div className="loaders"></div>
                 </div>
-              ) : events.length === 0 ? (
+              ) : category.length === 0 ? (
                 <div>NO DATA FOUND</div>
               ) : (
                 <CTable align="middle" className="mb-0 border" hover responsive>
@@ -140,30 +153,11 @@ const Dashboard = () => {
                     </CTableRow>
                   </CTableHead>
                   <CTableBody>
-                    {events
-                      .filter((item) => new Date(item.startDateTime) >= new Date())
-                      .sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime))
-                      .map((item, index) => {
-                        const ordersForEvent = orders?.filter((order) => order.event === item._id)
-                        const orderCount = ordersForEvent.length
-
-                        const organizer = users.find((user) => user._id === item.organizer)
+                    {category.map((item, index) => {
                         return (
                           <CTableRow v-for="item in tableItems" key={index}>
                             <CTableDataCell>
-                              <div>{item.title}</div>
-                              <CTooltip
-                                content={item.description}
-                                placement="top"
-                                style={customTooltipStyle}
-                              >
-                                <div className="small text-body-secondary text-nowrap">
-                                  <span>{item.location}</span> |{' '}
-                                  {item.description.length > 40
-                                    ? `${item.description.slice(0, 40)}...`
-                                    : item.description}
-                                </div>
-                              </CTooltip>
+                              <div>{item.name}</div>
                             </CTableDataCell>
                             <CTableDataCell>
                               <div style={{ display: 'flex', gap: '10px' }}>
@@ -171,40 +165,18 @@ const Dashboard = () => {
                                   className="deteleButton"
                                   onClick={() => {
                                     setDeleteModel(!deleteModel)
-                                    setReqDeleteEventId(item._id)
+                                    setReqDeleteCategoryId(item._id)
                                   }}
                                 >
                                   <CIcon style={{ color: 'white' }} icon={cilTrash} />
                                 </div>
-                                <div
+                                {/* <div
                                   className="viewBtn"
-                                  onClick={() => {
-                                    setViewModel(!viewModel)
-                                    setViewEventId({
-                                      id: item._id,
-                                      title: item.title,
-                                      location: item.location,
-                                      description: item.description,
-                                      image: item.imageUrl,
-                                      organizerfn: organizer.firstName,
-                                      organizerln: organizer.lastName,
-                                      organizerEmail: organizer.email,
-                                      start: item.startDateTime,
-                                      end: item.endDateTime,
-                                      price: item.isFree ? 'Free' : `$ ${item.price}`,
-                                      eventurl: item.url,
-                                      ordersForEvent,
-                                    })
-                                  }}
                                 >
-                                  <CIcon style={{ color: 'white' }} icon={cilNotes} />
-                                </div>
+                                  <CIcon style={{ color: 'white' }} icon={cilPlus} />
+                                </div> */}
                               </div>
                             </CTableDataCell>
-                            {/* <CTableDataCell>
-                        <div className="small text-body-secondary text-nowrap">Updated At</div>
-                        <div className="fw-semibold text-nowrap">{item.updatedAt && new Date(item.updatedAt).toLocaleString('en-IN', options)}</div>
-                      </CTableDataCell> */}
                           </CTableRow>
                         )
                       })}
@@ -215,6 +187,81 @@ const Dashboard = () => {
           </CCard>
         </CCol>
       </CRow>
+            {/* ********************* Add New Category Modal ***********************  */}
+            <CModal
+        visible={viewAddModel}
+        onClose={() => {
+          setViewAddModel(false)
+        }}
+      >
+        <CModalHeader>
+          <CModalTitle>Add new category</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+        <CForm>
+          <CFormInput
+            type="text"
+            id="FormControlInput1"
+            // label="Email address"
+            placeholder="category name"
+            aria-describedby="exampleFormControlInputHelpInline"
+            onChange={(e) => setNewCategory(e.target.value)}
+            value={newCategory}
+          />
+        </CForm>
+        </CModalBody>
+        <CModalFooter>
+          <CButton
+            color="secondary"
+            disabled={newCategory.length < 2}
+            onClick={handleAddNewCategory}
+          >
+            Add
+          </CButton>
+          <CButton
+            color="danger"
+            onClick={() => {
+              setViewAddModel(false)
+            }}
+            style={{ color: 'white' }}
+          >
+            Cancel
+          </CButton>
+        </CModalFooter>
+      </CModal>
+            {/* ********************* delete modal ***********************  */}
+            <CModal
+        visible={deleteModel}
+        onClose={() => {
+          setDeleteModel(false)
+          setReqDeleteCategoryId(null)
+        }}
+      >
+        <CModalHeader>
+          <CModalTitle>Delete Category</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          <p>Are you sure want to delete.</p>
+        </CModalBody>
+        <CModalFooter>
+          <CButton
+            onClick={() => {
+              setDeleteModel(false)
+              setReqDeleteCategoryId(null)
+            }}
+            color="secondary"
+          >
+            Close
+          </CButton>
+          <CButton
+            color="danger"
+            style={{ color: 'white' }}
+            onClick={() => handleDeleteCategory(reqDeleteCategoryId)}
+          >
+            Delete
+          </CButton>
+        </CModalFooter>
+      </CModal>
     </>
   )
 }
